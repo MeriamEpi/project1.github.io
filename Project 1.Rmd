@@ -56,10 +56,11 @@ summarize(company, rating=mean(rating, na.rm = TRUE))
 Of the Ecuadorian bean chococlates, A. Morin is the manufacturer with the highest average rating.
 
 #5.Average rating by country of origin
-
+```{r, echo=TRUE, message=FALSE}
 country <- group_by(chocolate, country_of_bean_origin)
 country <- summarize(country, rating=mean(rating, na.rm = TRUE))
 country <- arrange(country, desc(rating))
+knitr::kable(head(country[, 1:2]), "pipe")
 ```
 Tobago (3.63), China (3.50), and Sao Tome & Principe (3.50) are the countries of origin that have the highest average ratings. 
 
@@ -67,6 +68,9 @@ Tobago (3.63), China (3.50), and Sao Tome & Principe (3.50) are the countries of
 ```{r, echo=TRUE, message=FALSE}
 library(dplyr)
 country <- group_by(chocolate, country_of_bean_origin)
-country <- summarize(country, n=n())
-country <- arrange(country, desc(n))
+country_n <- summarize(country, n=n())
+country_n <- filter(country_n, n>=10)
+country_n <- summarize(country_n, rating=mean(rating, na.rm = TRUE))
+country_n <- arrange(country_n, desc(rating))
+knitr::kable(head(country_n[, 1:2]), "pipe")
 ```
