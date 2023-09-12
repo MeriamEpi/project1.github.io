@@ -53,11 +53,20 @@ ecud <- mutate(ecud, total=sum(present))
 company <- group_by(ecud, company_manufacturer) 
 summarize(company, rating=mean(rating, na.rm = TRUE))
 ```
-Of the Ecuadorian bean based chococlate, A. Morin is the manufacturer with the highest average rating.
+Of the Ecuadorian bean chococlates, A. Morin is the manufacturer with the highest average rating.
 
 #5.Average rating by country of origin
+
+country <- group_by(chocolate, country_of_bean_origin)
+country <- summarize(country, rating=mean(rating, na.rm = TRUE))
+country <- arrange(country, desc(rating))
+```
+Tobago (3.63), China (3.50), and Sao Tome & Principe (3.50) are the countries of origin that have the highest average ratings. 
+
+#6. 
 ```{r, echo=TRUE, message=FALSE}
 library(dplyr)
 country <- group_by(chocolate, country_of_bean_origin)
-summarize(country, rating=mean(rating, na.rm = TRUE))
+country <- summarize(country, n=n())
+country <- arrange(country, desc(n))
 ```
