@@ -68,7 +68,7 @@ Tobago (3.63), China (3.50), and Sao Tome & Principe (3.50) are the countries of
 ```{r, echo=TRUE, message=FALSE}
 library(dplyr)
 country <- group_by(chocolate, country_of_bean_origin)
-country_n <- summarize(country, n=n())
+country_n <- mutate(country, n=n())
 country_n <- filter(country_n, n>=10)
 country_n <- summarize(country_n, rating=mean(rating, na.rm = TRUE))
 country_n <- arrange(country_n, desc(rating))
