@@ -4,14 +4,60 @@ author: "Meriam Berka"
 date: "2023-09-12"
 output: html_document
 ---
+# setup
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
-## 1. 
-```{echo=FALSE}
+## Part 1
+
+#1. Histogram of ratings
+
+``` {r ggplot, echo=FALSE, message=FALSE}
+library(tidyverse)
+library(here)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
 ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=15)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Increasing the number of bins allows more granularity of data, better showing the shape of the distribution. However, if we increase the number of bins too much we start to have gaps in our data because the number of bins exceeds the number of potential scores. I selected a 15 bin histogram because it nicely shows the shape of the distribution but doesn't have the gapping a 20+ bin histogram does. 
+
+#2. Number of ratings by country of bean origin
+``` {r, echo=TRUE, message=FALSE}
+library(dplyr)
+count(chocolate, country_of_bean_origin, wt=NULL, sort=TRUE)
+``` 
+#3. Average ratings for Ecuadorian beans
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+library(knitr)
+ecud <- filter(chocolate,country_of_bean_origin == "Ecuador")
+ecud <- mutate(ecud, mean=mean(rating, na.rm = TRUE))
+ecud <- mutate(ecud, sd=sd(rating, na.rm = TRUE))
+ecud <- mutate(ecud, present=case_when(!is.na(rating) ~ 1 , is.na(rating) ~ 0 ))
+ecud <- mutate(ecud, total=sum(present))
+ecud <- select(ecud, (mean:total))
+ecud <- select(ecud, -(present))
+ecud <- filter(ecud, !row_number()!= 1 )
+knitr::kable(head(ecud[, 1:3]), "pipe")
+```
+Table 1: Average ratings, standard deviation of ratings and total number of ratings for Ecuadorian chocolates
+
+#4.Best manufacturer
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+ecud <- filter(chocolate,country_of_bean_origin == "Ecuador")
+ecud <- mutate(ecud, mean=mean(rating, na.rm = TRUE))
+ecud <- mutate(ecud, sd=sd(rating, na.rm = TRUE))
+ecud <- mutate(ecud, present=case_when(!is.na(rating) ~ 1 , is.na(rating) ~ 0 ))
+ecud <- mutate(ecud, total=sum(present))
+company <- group_by(ecud, company_manufacturer) 
+summarize(company, rating=mean(rating, na.rm = TRUE))
+```
+Of the Ecuadorian bean based chococlate, A. Morin is the manufacturer with the highest average rating.
+
+#5.Average rating by country of origin
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+country <- group_by(chocolate, country_of_bean_origin)
+summarize(country, rating=mean(rating, na.rm = TRUE))
+```
