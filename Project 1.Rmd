@@ -64,7 +64,7 @@ knitr::kable(head(country[, 1:2]), "pipe")
 ```
 Tobago (3.63), China (3.50), and Sao Tome & Principe (3.50) are the countries of origin that have the highest average ratings. 
 
-#6. 
+#6.Average rating by country of origin in countries with 10+ ratings
 ```{r, echo=TRUE, message=FALSE}
 library(dplyr)
 country <- group_by(chocolate, country_of_bean_origin)
@@ -74,3 +74,17 @@ country_n <- summarize(country_n, rating=mean(rating, na.rm = TRUE))
 country_n <- arrange(country_n, desc(rating))
 knitr::kable(head(country_n[, 1:2]), "pipe")
 ```
+Solomon Islands (3.45), Congo (3.32), and Cuba (3.29) are the countries of origin that have the highest average rating after filtering out countries with fewer than 10 chococlate bar reviews.
+
+#7. 
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+country <- group_by(chocolate, country_of_bean_origin)
+country_p <- mutate(country, n=n())
+country_p <- filter(country_p, n>=50)
+country_p <- lapply(country_p, gsub, pattern='%', replacement=' ')
+
+country_p <- mutate(country_p, percent = case_when(cocoa_percent < 60 ~ "1", cocoa_percent >= 60 ~ "2"))
+
+country_p <- mutate(percent = case_when (cocoa_percent >= 70% ~ "3"))
+country_p <- mutate(percent = case_when (cocoa_percent >= 90% ~ "4"))
