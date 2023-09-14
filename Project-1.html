@@ -439,26 +439,91 @@ summarize(company, rating=mean(rating, na.rm = TRUE))</code></pre>
 ##  9 Arete                   3.44
 ## 10 Askinosie               3   
 ## # ℹ 126 more rows</code></pre>
-<p>Of the Ecuadorian bean based chococlate, A. Morin is the manufacturer
-with the highest average rating.</p>
+<p>Of the Ecuadorian bean chococlates, A. Morin is the manufacturer with
+the highest average rating.</p>
 <p>#5.Average rating by country of origin</p>
+<pre class="r"><code>country &lt;- group_by(chocolate, country_of_bean_origin)
+country &lt;- summarize(country, rating=mean(rating, na.rm = TRUE))
+country &lt;- arrange(country, desc(rating))
+knitr::kable(head(country[, 1:2]), &quot;pipe&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">country_of_bean_origin</th>
+<th align="right">rating</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Tobago</td>
+<td align="right">3.625000</td>
+</tr>
+<tr class="even">
+<td align="left">China</td>
+<td align="right">3.500000</td>
+</tr>
+<tr class="odd">
+<td align="left">Sao Tome &amp; Principe</td>
+<td align="right">3.500000</td>
+</tr>
+<tr class="even">
+<td align="left">Solomon Islands</td>
+<td align="right">3.450000</td>
+</tr>
+<tr class="odd">
+<td align="left">Congo</td>
+<td align="right">3.318182</td>
+</tr>
+<tr class="even">
+<td align="left">Thailand</td>
+<td align="right">3.300000</td>
+</tr>
+</tbody>
+</table>
+<p>Tobago (3.63), China (3.50), and Sao Tome &amp; Principe (3.50) are
+the countries of origin that have the highest average ratings.</p>
+<p>#6.</p>
 <pre class="r"><code>library(dplyr)
 country &lt;- group_by(chocolate, country_of_bean_origin)
-summarize(country, rating=mean(rating, na.rm = TRUE))</code></pre>
-<pre><code>## # A tibble: 62 × 2
-##    country_of_bean_origin rating
-##    &lt;chr&gt;                   &lt;dbl&gt;
-##  1 Australia                3.25
-##  2 Belize                   3.23
-##  3 Blend                    3.04
-##  4 Bolivia                  3.18
-##  5 Brazil                   3.26
-##  6 Burma                    3   
-##  7 Cameroon                 3.08
-##  8 China                    3.5 
-##  9 Colombia                 3.20
-## 10 Congo                    3.32
-## # ℹ 52 more rows</code></pre>
+country_n &lt;- mutate(country, n=n())
+country_n &lt;- filter(country_n, n&gt;=10)
+country_n &lt;- summarize(country_n, rating=mean(rating, na.rm = TRUE))
+country_n &lt;- arrange(country_n, desc(rating))
+knitr::kable(head(country_n[, 1:2]), &quot;pipe&quot;)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">country_of_bean_origin</th>
+<th align="right">rating</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Solomon Islands</td>
+<td align="right">3.450000</td>
+</tr>
+<tr class="even">
+<td align="left">Congo</td>
+<td align="right">3.318182</td>
+</tr>
+<tr class="odd">
+<td align="left">Cuba</td>
+<td align="right">3.291667</td>
+</tr>
+<tr class="even">
+<td align="left">Vietnam</td>
+<td align="right">3.287671</td>
+</tr>
+<tr class="odd">
+<td align="left">Papua New Guinea</td>
+<td align="right">3.280000</td>
+</tr>
+<tr class="even">
+<td align="left">Madagascar</td>
+<td align="right">3.266949</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
