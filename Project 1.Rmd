@@ -310,9 +310,22 @@ library(ggplot2)
 
 #rename flavors so they're more descriptive
 chocolate_long <- mutate(chocolate_long, features = str_remove(features, "char_"))
-chocolate_long <- mutate(chocolate_long, features = if_else(features == "cocoabutter", "cocoa butter", features))
+chocolate_long <- mutate(chocolate_long, features = if_else(features == "cocoa_butter", "cocoa butter", features))
 #reorder features, ingredients then flavours"
 chocolate_long <- chocolate_long %>% mutate(features = fct_relevel(features, c("cocoa butter", "lecithin", "sugar", "salt", "vanilla"), after=1))
 #create plot
-chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = features)) + geom_smooth(aes(group=features, color = features), se = FALSE) + labs(title = "Trends in average chocolate bar ratings by ingredients and\nkey characteristics from 2006 to 2021", caption = "Meriam Berka") + xlab("Year") + ylab("Average rating") + theme_gray()
+chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = features)) + geom_smooth(aes(group=features, color = features), se = FALSE) + labs(title = "Trends in average chocolate bar ratings by ingredients and\nkey characteristics from 2006 to 2021", caption = "Meriam Berka") + xlab("Year") + ylab("Average rating") + scale_x_continuous(breaks = c(2008, 2012, 2016, 2020), minor_breaks = c(2006, 2010, 2014, 2018, 2022)) + theme_gray()
+```
 
+##. Part 5
+```{r, echo=TRUE, message=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+
+chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = review_date)) + geom_smooth(color = "burlywood4") + labs(title = "Ave chocolate bar ratings by ingredients and key characteristics from 2006 to 2021", caption = "Meriam Berka doesn't endorse this") + xlab("date123%") + ylab(NULL) + scale_x_continuous(breaks = c(2006, 2017, 2018, 2021)) + theme_dark()
+```
+
+#Instead of colors being used to make trends in features clear it's highlighting years, which are already obvious based on the x-axis. Colors are inconsistent and low contrast.Overall trend line doesn't communicate anything meaningful. Title is not wrapped to the plot, y-label is missing, x-label is uninformative, and x-axis breaks are inconsistent.I also just think the dark theme is (in general) ugly and not that readable. 
+
+##. Part 6
