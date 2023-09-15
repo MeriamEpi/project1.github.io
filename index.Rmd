@@ -5,8 +5,6 @@ date: "2023-09-12"
 output:
   postcards::jolla
 ---
-# setup
-
 
 ## Part 1
 
@@ -217,6 +215,7 @@ qplot(percent, rating, data=Vietnam, geom="boxplot") + ggtitle("Vietnam")
 ```
 
 ## Part 2
+
 ```{r ggplot, echo=TRUE, message=FALSE, warning=FALSE, out.width="25%"}
 library(gapminder)
 library(tidyverse)
@@ -264,6 +263,7 @@ ggplot(Oceania, aes(continent, rating)) + geom_violin()
 ```
 
 ## Part 3
+
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
@@ -304,6 +304,7 @@ print(chocolate_long, n=192)
 Long dataset of mean scores for each ingredient and main characteristic by review year
 
 ## Part 4
+
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
@@ -319,6 +320,7 @@ chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color =
 ```
 
 ## Part 5
+
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
@@ -337,6 +339,7 @@ chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color =
 
 
 ## Part 6
+
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
