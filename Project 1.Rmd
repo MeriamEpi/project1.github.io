@@ -216,7 +216,7 @@ qplot(percent, rating, data=Vietnam, geom="boxplot") + ggtitle("Vietnam")
 ```
 
 ## Part 2
-```{r ggplot, echo=FALSE, message=FALSE}
+```{r ggplot, echo=FALSE, message=FALSE, warning=FALSE, out.width="25%"}
 library(gapminder)
 library(tidyverse)
 library(dplyr)
@@ -282,8 +282,9 @@ chocolate <- mutate(chocolate, char_creamy = case_when(grepl("creamy", most_memo
 chocolate <- mutate(chocolate, char_roasty = case_when(grepl("roasty", most_memorable_characteristics) ~ 1, .default = 0))
 chocolate <- mutate(chocolate, char_earthy = case_when(grepl("earthy", most_memorable_characteristics) ~ 1, .default = 0))
 #group by year and calculate means
-chocolate_byyear <- group_by(chocolate, review_date) %>%
-    summarize(chocolate,
+chocolate <- subset(chocolate, select=-c(ref, company_manufacturer, company_location, country_of_bean_origin, specific_bean_origin_or_bar_name, cocoa_percent, ingredients, most_memorable_characteristics, rating ))
+chocolate <- group_by(chocolate, review_date)
+chocolate <- summarize(chocolate,
               beans = mean(beans, na.rm = TRUE), 
               sugar = mean(sugar, na.rm = TRUE),
               cocoa_butter = mean(cocoa_butter, na.rm = TRUE), 
@@ -296,5 +297,7 @@ chocolate_byyear <- group_by(chocolate, review_date) %>%
               char_creamy = mean(char_creamy, na.rm = TRUE), 
               char_roasty = mean(char_roasty, na.rm = TRUE), 
               char_earthy = mean(char_earthy, na.rm = TRUE))
-
+chocolate_long <- chocolate %>% pivot_longer(-review_date, names_to = "features", values_to = "mean_score")
+print(chocolate_long, n=192)
 ```
+Long dataset of mean scores for each ingredient and main characteristic by review year
