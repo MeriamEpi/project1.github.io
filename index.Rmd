@@ -1,0 +1,356 @@
+---
+title: "Project 1"
+author: "Meriam Berka"
+date: "2023-09-12"
+output:
+  postcards::jolla
+---
+# setup
+
+
+## Part 1
+
+#1. Histogram of ratings
+
+``` {r echo=TRUE, message=FALSE, out.width="50%"}
+library(tidyverse)
+library(here)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+ggplot(chocolate, aes(x=rating)) + geom_histogram(bins=15) + ggtitle("Histogram of chocolate bar ratings")
+```
+
+
+Increasing the number of bins allows more granularity of data, better showing the shape of the distribution. However, if we increase the number of bins too much we start to have gaps in our data because the number of bins exceeds the number of potential scores. I selected a 15 bin histogram because it nicely shows the shape of the distribution but doesn't have the gapping a 20+ bin histogram does. 
+
+#2. Number of ratings by country of bean origin
+``` {r, echo=TRUE, message=FALSE}
+library(dplyr)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+count <-count(chocolate, country_of_bean_origin, wt=NULL, sort=TRUE)
+print(count, n=62)
+``` 
+The number of ratings by each country of origin is described in the table above
+
+#3. Average ratings for Ecuadorian beans
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+library(knitr)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+ecud <- filter(chocolate,country_of_bean_origin == "Ecuador")
+ecud <- mutate(ecud, mean=mean(rating, na.rm = TRUE))
+ecud <- mutate(ecud, sd=sd(rating, na.rm = TRUE))
+ecud <- mutate(ecud, present=case_when(!is.na(rating) ~ 1 , is.na(rating) ~ 0 ))
+ecud <- mutate(ecud, total=sum(present))
+ecud <- select(ecud, (mean:total))
+ecud <- select(ecud, -(present))
+ecud <- filter(ecud, !row_number()!= 1 )
+knitr::kable(head(ecud[, 1:3]), "pipe")
+```
+Average ratings, standard deviation of ratings and total number of ratings for Ecuadorian chocolates
+
+#4.Best manufacturer
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+ecud <- filter(chocolate,country_of_bean_origin == "Ecuador")
+ecud <- mutate(ecud, mean=mean(rating, na.rm = TRUE))
+ecud <- mutate(ecud, sd=sd(rating, na.rm = TRUE))
+ecud <- mutate(ecud, present=case_when(!is.na(rating) ~ 1 , is.na(rating) ~ 0 ))
+ecud <- mutate(ecud, total=sum(present))
+company <- group_by(ecud, company_manufacturer) 
+summarize(company, rating=mean(rating, na.rm = TRUE))
+```
+Of the Ecuadorian bean chococlates, A. Morin is the manufacturer with the highest average rating.
+
+#5.Average rating by country of origin
+```{r, echo=TRUE, message=FALSE}
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+country <- group_by(chocolate, country_of_bean_origin)
+country <- summarize(country, rating=mean(rating, na.rm = TRUE))
+country <- arrange(country, desc(rating))
+knitr::kable(head(country[, 1:2]), "pipe")
+```
+Tobago (3.63), China (3.50), and Sao Tome & Principe (3.50) are the countries of origin that have the highest average ratings. 
+
+#6.Average rating by country of origin in countries with 10+ ratings
+```{r, echo=TRUE, message=FALSE}
+library(dplyr)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+country <- group_by(chocolate, country_of_bean_origin)
+country_n <- mutate(country, n=n())
+country_n <- filter(country_n, n>=10)
+country_n <- summarize(country_n, rating=mean(rating, na.rm = TRUE))
+country_n <- arrange(country_n, desc(rating))
+knitr::kable(head(country_n[, 1:2]), "pipe")
+```
+Solomon Islands (3.45), Congo (3.32), and Cuba (3.29) are the countries of origin that have the highest average rating after filtering out countries with fewer than 10 chococlate bar reviews.
+
+#7. 
+```{r, echo=TRUE, fig.show='hide', message=FALSE, warning=FALSE}
+library(dplyr)
+library(forcats)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+country <- group_by(chocolate, country_of_bean_origin)
+country <- mutate(country, n=n())
+country <- filter(country, n>=50)
+country <- mutate(country, c_percent = str_remove(cocoa_percent, "%"))
+country$c_percent <-as.numeric(country$c_percent) 
+country <- mutate(country, percent = case_when(c_percent < 60 ~ "1", c_percent >= 60 & c_percent < 70 ~ "2", c_percent >= 70 & c_percent < 90 ~ "3", c_percent >= 90 ~ "4"))
+
+country <- country %>% mutate(percent = fct_relevel(percent, c("2", "3", "4"), after=1))
+#Belize
+Belize <- filter(country, country_of_bean_origin=="Belize")
+qplot(percent, rating, data=Belize, geom="boxplot") + ggtitle("Belize")
+#Blend
+Blend <- filter(country, country_of_bean_origin=="Blend")
+qplot(percent, rating, data=Blend, geom="boxplot") + ggtitle("Blend")
+#Bolivia
+Bolivia <- filter(country, country_of_bean_origin=="Bolivia")
+qplot(percent, rating, data=Bolivia, geom="boxplot") + ggtitle("Bolivia")
+#Brazil
+Brazil <- filter(country, country_of_bean_origin=="Brazil")
+qplot(percent, rating, data=Brazil, geom="boxplot") + ggtitle("Brazil")  
+#Colombia
+Colombia <- filter(country, country_of_bean_origin=="Colombia")
+qplot(percent, rating, data=Colombia, geom="boxplot") + ggtitle("Colombia")  
+#Dominican Republic
+DR <- filter(country, country_of_bean_origin=="Dominican Republic")
+qplot(percent, rating, data=DR, geom="boxplot") + ggtitle("Dominican Republic")
+#Ecuador
+Ecuador <- filter(country, country_of_bean_origin=="Ecuador")
+qplot(percent, rating, data=Ecuador, geom="boxplot") + ggtitle("Ecuador") 
+#Guatemala
+Guatemala <- filter(country, country_of_bean_origin=="Guatemala")
+qplot(percent, rating, data=Guatemala, geom="boxplot") + ggtitle("Guatemala")
+#Madagascar
+Madagascar <- filter(country, country_of_bean_origin=="Madagascar")
+qplot(percent, rating, data=Madagascar, geom="boxplot") + ggtitle("Madagascar")
+#Mexico
+Mexico <- filter(country, country_of_bean_origin=="Mexico")
+qplot(percent, rating, data=Mexico, geom="boxplot") + ggtitle("Mexico")
+#Nicaragua
+Nicaragua <- filter(country, country_of_bean_origin=="Nicaragua")
+qplot(percent, rating, data=Nicaragua, geom="boxplot") + ggtitle("Nicaragua")
+#Papua New Guinea
+PNG <- filter(country, country_of_bean_origin=="Papua New Guinea")
+qplot(percent, rating, data=PNG, geom="boxplot") + ggtitle("Papua New Guinea")
+#Peru
+Peru <- filter(country, country_of_bean_origin=="Peru")
+qplot(percent, rating, data=Peru, geom="boxplot") + ggtitle("Peru")
+#Tanzania
+Tanzania <- filter(country, country_of_bean_origin=="Tanzania")
+qplot(percent, rating, data=Tanzania, geom="boxplot") + ggtitle("Tanzania")
+#Venezuela
+Venezuela <- filter(country, country_of_bean_origin=="Venezuela")
+qplot(percent, rating, data=Venezuela, geom="boxplot") + ggtitle("Venezuela")
+#Vietnam
+Vietnam <- filter(country, country_of_bean_origin=="Vietnam")
+qplot(percent, rating, data=Vietnam, geom="boxplot") + ggtitle("Vietnam")
+```
+```{r, echo=FALSE, message=FALSE, warning=FALSE, out.width="25%"}
+library(dplyr)
+library(forcats)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+country <- group_by(chocolate, country_of_bean_origin)
+country <- mutate(country, n=n())
+country <- filter(country, n>=50)
+country <- mutate(country, c_percent = str_remove(cocoa_percent, "%"))
+country$c_percent <-as.numeric(country$c_percent) 
+country <- mutate(country, percent = case_when(c_percent < 60 ~ "1", c_percent >= 60 & c_percent < 70 ~ "2", c_percent >= 70 & c_percent < 90 ~ "3", c_percent >= 90 ~ "4"))
+
+country <- country %>% mutate(percent = fct_relevel(percent, c("2", "3", "4"), after=1))
+#Belize
+Belize <- filter(country, country_of_bean_origin=="Belize")
+qplot(percent, rating, data=Belize, geom="boxplot") + ggtitle("Belize")
+#Blend
+Blend <- filter(country, country_of_bean_origin=="Blend")
+qplot(percent, rating, data=Blend, geom="boxplot") + ggtitle("Blend")
+#Bolivia
+Bolivia <- filter(country, country_of_bean_origin=="Bolivia")
+qplot(percent, rating, data=Bolivia, geom="boxplot") + ggtitle("Bolivia")
+#Brazil
+Brazil <- filter(country, country_of_bean_origin=="Brazil")
+qplot(percent, rating, data=Brazil, geom="boxplot") + ggtitle("Brazil")  
+#Colombia
+Colombia <- filter(country, country_of_bean_origin=="Colombia")
+qplot(percent, rating, data=Colombia, geom="boxplot") + ggtitle("Colombia")  
+#Dominican Republic
+DR <- filter(country, country_of_bean_origin=="Dominican Republic")
+qplot(percent, rating, data=DR, geom="boxplot") + ggtitle("Dominican Republic")
+#Ecuador
+Ecuador <- filter(country, country_of_bean_origin=="Ecuador")
+qplot(percent, rating, data=Ecuador, geom="boxplot") + ggtitle("Ecuador") 
+#Guatemala
+Guatemala <- filter(country, country_of_bean_origin=="Guatemala")
+qplot(percent, rating, data=Guatemala, geom="boxplot") + ggtitle("Guatemala")
+#Madagascar
+Madagascar <- filter(country, country_of_bean_origin=="Madagascar")
+qplot(percent, rating, data=Madagascar, geom="boxplot") + ggtitle("Madagascar")
+#Mexico
+Mexico <- filter(country, country_of_bean_origin=="Mexico")
+qplot(percent, rating, data=Mexico, geom="boxplot") + ggtitle("Mexico")
+#Nicaragua
+Nicaragua <- filter(country, country_of_bean_origin=="Nicaragua")
+qplot(percent, rating, data=Nicaragua, geom="boxplot") + ggtitle("Nicaragua")
+#Papua New Guinea
+PNG <- filter(country, country_of_bean_origin=="Papua New Guinea")
+qplot(percent, rating, data=PNG, geom="boxplot") + ggtitle("Papua New Guinea")
+#Peru
+Peru <- filter(country, country_of_bean_origin=="Peru")
+qplot(percent, rating, data=Peru, geom="boxplot") + ggtitle("Peru")
+#Tanzania
+Tanzania <- filter(country, country_of_bean_origin=="Tanzania")
+qplot(percent, rating, data=Tanzania, geom="boxplot") + ggtitle("Tanzania")
+#Venezuela
+Venezuela <- filter(country, country_of_bean_origin=="Venezuela")
+qplot(percent, rating, data=Venezuela, geom="boxplot") + ggtitle("Venezuela")
+#Vietnam
+Vietnam <- filter(country, country_of_bean_origin=="Vietnam")
+qplot(percent, rating, data=Vietnam, geom="boxplot") + ggtitle("Vietnam")
+```
+
+## Part 2
+```{r ggplot, echo=FALSE, message=FALSE, warning=FALSE, out.width="25%"}
+library(gapminder)
+library(tidyverse)
+library(dplyr)
+library(here)
+library(ggplot2)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+chocolate <- rename(chocolate, country=country_of_bean_origin)
+#remove extra data and rows from gapminder dataset
+gapminder_2 <- subset(gapminder, select= -c(year, lifeExp, pop, gdpPercap))
+gapminder_2 <- distinct(gapminder_2, country, .keep_all=TRUE)
+chocolate <- left_join(x=chocolate, y=gapminder_2, by="country")
+#Americas
+chocolate <- mutate(chocolate, continent = if_else((country == "Belize" | country == "St.Vincent-Grenadines" | country == "Grenada" | country == "St. Lucia" | country == "Martinique" | country == "U.S.A." | country == "Suriname" | country == "Tobago" | country == "Trinidad"), "Americas", continent)) 
+#Asia
+chocolate <- mutate(chocolate, continent = if_else((country == "Burma" | country == "Sulawesi" | country == "Sumatra"), "Asia", continent))
+#Africa
+chocolate <- mutate(chocolate, continent = if_else((country == "Congo" | country == "Ivory Coast" | country == "Principe" | country == "Sao Tome & Principe" | country == "Sao Tome" | country == "DR Congo"), "Africa", continent))
+#Oceania
+chocolate <- mutate(chocolate, continent = if_else((country == "Fiji" | country == "Papua New Guinea" | country == "Samoa" | country == "Solomon Islands" | country == "Vanuatu"), "Oceania", continent))
+#Blend
+chocolate <- mutate(chocolate, continent = if_else((country == "Blend"), "Blend", continent))
+#check to ensure there are no NA's
+chocolate %>% group_by(continent) %>% summarize(distinct_points = n_distinct(continent))
+#drop rows for countries with fewer than 10 reviews, and Blends
+chocolate <- group_by(chocolate, country) %>% mutate(n = n())
+chocolate <- filter(chocolate, n>=10)
+chocolate <- filter(chocolate, country!= "Blend")
+#violin plot setup
+Africa <- filter(chocolate, continent == "Africa")
+Asia <- filter(chocolate, continent == "Asia")
+Americas <- filter(chocolate, continent == "Americas")
+Oceania <- filter(chocolate, continent == "Oceania")
+
+#Violin plots
+#Violin plot of chocolate ratings in African countries
+ggplot(Africa, aes(continent, rating)) + geom_violin()
+#Violin plot of chocolate ratings in Asian countries
+ggplot(Asia, aes(continent, rating)) + geom_violin()
+#Violin plot of chocolate ratings in countries in the Americas
+ggplot(Americas, aes(continent, rating)) + geom_violin()
+#Violin plot of chocolate ratings in Oceanic countries
+ggplot(Oceania, aes(continent, rating)) + geom_violin()
+```
+
+##Part 3
+```{r, echo=TRUE, message=FALSE}
+library(tidyverse)
+library(here)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+#add ingredient columns
+chocolate <- mutate(chocolate, beans = case_when(grepl("B", ingredients) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, sugar = case_when(grepl("S", ingredients) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, cocoa_butter = case_when(grepl("C", ingredients) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, vanilla = case_when(grepl("V", ingredients) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, lecithin = case_when(grepl("L", ingredients) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, salt = case_when(grepl("Sa", ingredients) ~ 1, .default = 0))
+#add characteristic columns
+chocolate <- mutate(chocolate, char_cocoa = case_when(grepl("cocoa", most_memorable_characteristics) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, char_sweet = case_when(grepl("sweet", most_memorable_characteristics) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, char_nutty = case_when(grepl("nutty", most_memorable_characteristics) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, char_creamy = case_when(grepl("creamy", most_memorable_characteristics) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, char_roasty = case_when(grepl("roasty", most_memorable_characteristics) ~ 1, .default = 0))
+chocolate <- mutate(chocolate, char_earthy = case_when(grepl("earthy", most_memorable_characteristics) ~ 1, .default = 0))
+#group by year and calculate means
+chocolate <- subset(chocolate, select=-c(ref, company_manufacturer, company_location, country_of_bean_origin, specific_bean_origin_or_bar_name, cocoa_percent, ingredients, most_memorable_characteristics, rating ))
+chocolate <- group_by(chocolate, review_date)
+chocolate <- summarize(chocolate,
+              beans = mean(beans, na.rm = TRUE), 
+              sugar = mean(sugar, na.rm = TRUE),
+              cocoa_butter = mean(cocoa_butter, na.rm = TRUE), 
+              vanilla = mean(vanilla, na.rm = TRUE), 
+              lecithin = mean(lecithin, na.rm = TRUE), 
+              salt = mean(salt, na.rm = TRUE), 
+              char_cocoa = mean(char_cocoa, na.rm = TRUE), 
+              char_sweet = mean(char_sweet, na.rm = TRUE), 
+              char_nutty = mean(char_nutty, na.rm = TRUE), 
+              char_creamy = mean(char_creamy, na.rm = TRUE), 
+              char_roasty = mean(char_roasty, na.rm = TRUE), 
+              char_earthy = mean(char_earthy, na.rm = TRUE))
+chocolate_long <- chocolate %>% pivot_longer(-review_date, names_to = "features", values_to = "mean_score")
+print(chocolate_long, n=192)
+```
+Long dataset of mean scores for each ingredient and main characteristic by review year
+
+##. Part 4
+```{r, echo=TRUE, message=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+
+#rename flavors so they're more descriptive
+chocolate_long <- mutate(chocolate_long, features = str_remove(features, "char_"))
+chocolate_long <- mutate(chocolate_long, features = if_else(features == "cocoa_butter", "cocoa butter", features))
+#reorder features, ingredients then flavours"
+chocolate_long <- chocolate_long %>% mutate(features = fct_relevel(features, c("cocoa butter", "lecithin", "sugar", "salt", "vanilla"), after=1))
+#create plot
+chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = features)) + geom_smooth(aes(group=features, color = features), se = FALSE) + labs(title = "Trends in average chocolate bar ratings by ingredients and\nkey characteristics from 2006 to 2021", caption = "Meriam Berka") + xlab("Year") + ylab("Average rating") + scale_x_continuous(breaks = c(2008, 2012, 2016, 2020), minor_breaks = c(2006, 2010, 2014, 2018, 2022)) + theme_gray()
+```
+
+##. Part 5
+```{r, echo=TRUE, message=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+
+chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = review_date)) + geom_smooth(color = "burlywood4") + labs(title = "Ave chocolate bar ratings by ingredients and key characteristics from 2006 to 2021", caption = "Meriam Berka doesn't endorse this") + xlab("date123%") + ylab(NULL) + scale_x_continuous(breaks = c(2006, 2017, 2018, 2021)) + theme_dark()
+```
+
+#
+- Instead of colors being used to make trends in features clear it's highlighting years, which are already obvious based on the x-axis.
+- Colors are inconsistent, compared to the original plot where the same colors were used for points and trends lines, and are low contrast.
+- Overall trend line doesn't communicate anything meaningful, it's an average of all points over the years.
+- Title is not wrapped to the plot.
+- Y-label is missing, x-label is uninformative, and x-axis breaks are inconsistent making it very difficult to know what's even being plotted.
+- The plot doesn't actually show what the title says it should, since the features are not identified in any way (ex. by color, or shape of points) trends can not be discerned.
+
+
+##. Part 6
+```{r, echo=TRUE, message=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+chocolate <- readRDS(here("data", "chocolate.RDS"))
+
+chocolate %>%
+    ggplot(aes(x = as.factor(review_date), y = rating)) + geom_violin(draw_quantiles = c(0.5), color = "#FF99FF", fill = "#FFCCFF")  + ggtitle("Distribution of chocolate bar ratings from 0 to 4 by year of\nreview, 2006-2021") + labs(caption = "Data from Tidy Tuesday 01-11-2022:\nR4DS Online Learning Community (2023). Tidy Tuesday: A weekly social data project.\nhttps://github.com/rfordatascience/tidytuesday.')") + xlab("Year of review") + ylab("Rating (0 to 4)") + theme(plot.title = element_text(margin = margin( 0.01, 0, 20, 0), family = "serif", face = "bold"), axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, color = "white"), axis.text.y = element_text(color = "white"), axis.title.x = element_text(margin = margin(12, 0, 25, 0)), axis.title.y = element_text(margin = margin(10, 10, 10, 5)), plot.caption = element_text(hjust = 0, color = "white"), panel.grid.major = element_line(size = 0.5, linetype = 'solid', colour = "lavender"), panel.grid.minor = element_line(size = 0.25, linetype = 'solid', colour = "lavender"), text = element_text(color = "white"), plot.background = element_rect(fill = "gray7"), panel.background = element_rect(fill="gray60"), plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), "inches"))
+```
+
+- Added an informative title so it's clear what is actually being represented by this graph and to aid in interpretation.
+- Added y-axis label and x-axis labels and rotated x-axis labels so they're less cluttered and easier to read.
+- Added caption with data citation to properly attribute the data used.
+- Added line at median of each plot to make it easier to visually compare average scores across years. 
+- Changed line to lavender, text to white, background to dark gray, and panel to light grey to increase visual interest while maintaining color contrast.
+- Increased text spacing, including adding a gap between axis labels and axes and title and plot. The caption was also moved to the bottom of the page since it's extra information and not a part of the actual plot.
+- Changed title font to make it cuter!
