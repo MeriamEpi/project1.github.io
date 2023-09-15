@@ -217,7 +217,7 @@ qplot(percent, rating, data=Vietnam, geom="boxplot") + ggtitle("Vietnam")
 ```
 
 ## Part 2
-```{r ggplot, echo=FALSE, message=FALSE, warning=FALSE, out.width="25%"}
+```{r ggplot, echo=TRUE, message=FALSE, warning=FALSE, out.width="25%"}
 library(gapminder)
 library(tidyverse)
 library(dplyr)
@@ -263,7 +263,7 @@ ggplot(Americas, aes(continent, rating)) + geom_violin()
 ggplot(Oceania, aes(continent, rating)) + geom_violin()
 ```
 
-##Part 3
+## Part 3
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
@@ -303,7 +303,7 @@ print(chocolate_long, n=192)
 ```
 Long dataset of mean scores for each ingredient and main characteristic by review year
 
-##. Part 4
+## Part 4
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
@@ -318,7 +318,7 @@ chocolate_long <- chocolate_long %>% mutate(features = fct_relevel(features, c("
 chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = features)) + geom_smooth(aes(group=features, color = features), se = FALSE) + labs(title = "Trends in average chocolate bar ratings by ingredients and\nkey characteristics from 2006 to 2021", caption = "Meriam Berka") + xlab("Year") + ylab("Average rating") + scale_x_continuous(breaks = c(2008, 2012, 2016, 2020), minor_breaks = c(2006, 2010, 2014, 2018, 2022)) + theme_gray()
 ```
 
-##. Part 5
+## Part 5
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
@@ -336,7 +336,7 @@ chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color =
 - The plot doesn't actually show what the title says it should, since the features are not identified in any way (ex. by color, or shape of points) trends can not be discerned.
 
 
-##. Part 6
+## Part 6
 ```{r, echo=TRUE, message=FALSE}
 library(tidyverse)
 library(here)
