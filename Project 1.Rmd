@@ -301,3 +301,18 @@ chocolate_long <- chocolate %>% pivot_longer(-review_date, names_to = "features"
 print(chocolate_long, n=192)
 ```
 Long dataset of mean scores for each ingredient and main characteristic by review year
+
+##. Part 4
+```{r, echo=TRUE, message=FALSE}
+library(tidyverse)
+library(here)
+library(ggplot2)
+
+#rename flavors so they're more descriptive
+chocolate_long <- mutate(chocolate_long, features = str_remove(features, "char_"))
+chocolate_long <- mutate(chocolate_long, features = if_else(features == "cocoabutter", "cocoa butter", features))
+#reorder features, ingredients then flavours"
+chocolate_long <- chocolate_long %>% mutate(features = fct_relevel(features, c("cocoa butter", "lecithin", "sugar", "salt", "vanilla"), after=1))
+#create plot
+chocolate_long %>% ggplot(aes(review_date, mean_score)) + geom_point(aes(color = features)) + geom_smooth(aes(group=features, color = features), se = FALSE) + labs(title = "Trends in average chocolate bar ratings by ingredients and\nkey characteristics from 2006 to 2021", caption = "Meriam Berka") + xlab("Year") + ylab("Average rating") + theme_gray()
+
